@@ -71,3 +71,9 @@ Files Generated:
 movies.pkl – Preprocessed dataframe.
 similarity.pkl – Cosine similarity matrix.
 movie_dict.pkl – Dictionary of movies for web apps.
+
+The project includes a modern frontend using Streamlit that allows users to:
+
+Select a movie title from a dropdown,
+Click "Recommend",
+View 5 recommended movies with posters.
