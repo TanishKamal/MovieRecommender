@@ -1,63 +1,73 @@
-import streamlit as st
-import pickle
-import pandas as pd
-import requests
+Project Overview:
+This project processes movie metadata from the TMDB 5000 dataset and uses content-based filtering techniques to recommend movies. By combining features like genres, keywords, cast, crew, and overview, it creates a similarity matrix using TF-based vectorization.
 
-def fetch_poster(movie_id):
-    url = "https://api.themoviedb.org/3/movie/{}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US".format(
-        movie_id)
-    data = requests.get(url)
-    data = data.json()
-    poster_path = data['poster_path']
-    full_path = "https://image.tmdb.org/t/p/w500/" + poster_path
-    return full_path
+Features:
 
-def recommend(movie):
-  movie_index = movies[movies['title'] == movie].index[0]
-  distances = similarity[movie_index]
-  movies_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x:x[1])[1:6]
+Data preprocessing and merging of TMDB datasets.
+Feature extraction from:
+Genres,
+Keywords,
+Cast,
+Crew (Director),
 
-  recommended_movies = []
-  recommended_movies_posters = []
-  for i in movies_list:
-      movie_id = movies.iloc[i[0]].movie_id
+Overview:
 
-      recommended_movies.append(movies.iloc[i[0]].title)
-      recommended_movies_posters.append(fetch_poster(movie_id))
-  return recommended_movies, recommended_movies_posters
+Text normalization, stemming, and tokenization.
+Similarity calculation using cosine similarity.
+Movie recommendation based on title input.
+Final export of processed data and model with Pickle.
 
-movies_dict = pickle.load(open('movie_dict.pkl','rb'))
-movies = pd.DataFrame(movies_dict)
+Dataset:
 
-similarity = pickle.load(open('similarity.pkl','rb'))
+The project uses the TMDB 5000 Movie Dataset, which includes:
+tmdb_5000_movies.csv,
+tmdb_5000_credits.csv.
 
-st.title('Movie Recommender System')
+Tech Stack:
 
-selected_movie_name = st.selectbox(
-    'Select any movie', movies['title'].values
-)
+Python,
+Pandas, NumPy,
+NLTK for NLP tasks,
+Scikit-learn for vectorization and similarity,
+Pickle for saving model/data,
+Google Colab, PyCharm.
 
-if st.button('Recommend'):
-    names,posters = recommend(selected_movie_name)
+Workflow:
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+1. Data Loading & Merging-
+movies and credits datasets are merged on the title column.
+Selected columns: movie_id, title, overview, genres, keywords, cast, and crew.
 
-    with col1:
-        st.text(names[0])
-        st.image(posters[0])
+2. Data Cleaning-
+Removed nulls and duplicates.
+Converted stringified lists to Python lists using ast.literal_eval.
 
-    with col2:
-        st.text(names[1])
-        st.image(posters[1])
+3. Feature Engineering-
+Extracted top 3 actors from cast.
+Extracted only the Director from the crew.
+Cleaned and joined all textual features into a single tags column.
 
-    with col3:
-        st.text(names[2])
-        st.image(posters[2])
+4. Text Processing-
+Lowercased text.
+Removed whitespace.
+Applied stemming using PorterStemmer.
 
-    with col4:
-        st.text(names[3])
-        st.image(posters[3])
+5. Vectorization-
+Used CountVectorizer (Bag-of-Words) with max_features=5000 and stopwords removed.
 
-    with col5:
-        st.text(names[4])
-        st.image(posters[4])
+6. Similarity Calculation-
+Used cosine similarity on the vector matrix.
+Implemented a recommend() function that:
+Finds index of the selected movie,
+Retrieves top 5 similar movies based on similarity scores.
+
+7. Model Export-
+Saved:
+movies.pkl: dataframe with movie IDs and tags.
+similarity.pkl: cosine similarity matrix.
+movie_dict.pkl: movie info dictionary.
+
+Files Generated:
+movies.pkl – Preprocessed dataframe.
+similarity.pkl – Cosine similarity matrix.
+movie_dict.pkl – Dictionary of movies for web apps.
